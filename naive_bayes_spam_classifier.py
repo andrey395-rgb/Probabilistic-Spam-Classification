@@ -541,6 +541,15 @@ SAMPLE_LABELS: List[str] = [
 ]
 
 
+def load_spamassassin() -> Tuple[List[str], List[str]]:
+    from datasets import load_dataset
+    ds = load_dataset("talby/spamassassin", "text", split="train")
+    documents = [row["text"] for row in ds]
+    
+    labels = ["spam" if row["label"] == 0 else "ham" for row in ds]
+    
+    return documents, labels
+
 def main() -> None:
     """Run 80/20 evaluation on the bundled sample corpus and print metrics."""
     train_docs, train_labels, test_docs, test_labels = train_test_split(
