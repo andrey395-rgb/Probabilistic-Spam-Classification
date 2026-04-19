@@ -507,38 +507,8 @@ def evaluate_classifier(
 
 
 # ---------------------------------------------------------------------------
-# Sample dataset & demo
+# 4. Dataset loading & CLI entrypoint
 # ---------------------------------------------------------------------------
-
-SAMPLE_RAW_EMAILS: List[str] = [
-    # Ham — personal / work tone
-    "<p>Hi Alice, meeting moved to <b>3pm</b> tomorrow. Thanks!</p>",
-    "Please review the attached Q3 report and send feedback by Friday.",
-    "Lunch at the cafe near the office? Let me know if you're free.",
-    "Your invoice #1042 has been paid. Thank you for your business.",
-    "Reminder: dentist appointment next Tuesday at 10am.",
-    # Spam — promotional / scam patterns
-    "<html><body>Congratulations!!! You WON $1,000,000!!! Click HERE now!!!</body></html>",
-    "FREE!!! Viagra/Cialis cheap meds!!! 100% guarantee!!! Act NOW!!!",
-    "You have been selected for a cash prize. Wire transfer fee required today.",
-    "URGENT: Your account will be suspended. Verify password immediately!!!",
-    "Lose weight fast with this one weird trick — guaranteed results!!!",
-    "Hot singles in your area want to chat — click this link now FREE!!!",
-]
-
-SAMPLE_LABELS: List[str] = [
-    "ham",
-    "ham",
-    "ham",
-    "ham",
-    "ham",
-    "spam",
-    "spam",
-    "spam",
-    "spam",
-    "spam",
-    "spam",
-]
 
 
 def load_spamassassin() -> Tuple[List[str], List[str]]:
