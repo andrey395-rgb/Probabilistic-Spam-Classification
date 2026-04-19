@@ -33,12 +33,14 @@ Probabilistic-Spam-Classification/
 
 - Python 3.11+
 - `datasets==2.14.7` (specific version required for SpamAssassin corpus compatibility)
+- `matplotlib`
+- `seaborn`
+- `numpy`
 
 Install dependencies:
 
 ```bash
-pip install datasets==2.14.7
-```
+pip install datasets==2.14.7 matplotlib seaborn numpy
 
 > **Note:** The SpamAssassin dataset on Hugging Face (`talby/spamassassin`) still uses an older loading script format. Versions of `datasets` newer than 2.14.7 have dropped support for this format. Downgrading to `2.14.7` is required until the dataset author migrates to Parquet.
 
@@ -65,7 +67,7 @@ Once open:
 python naive_bayes_spam_classifier.py
 ```
 
-This trains on the SpamAssassin corpus, evaluates on an 80/20 hold-out split, and prints the confusion matrix and metrics to the terminal.
+This trains on the SpamAssassin corpus, evaluates on an 80/20 hold-out split, and prints the confusion matrix and metrics to the terminal. CLI will pop up visual graphs.
 
 ---
 
