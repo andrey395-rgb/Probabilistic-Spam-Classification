@@ -58,6 +58,8 @@ class TextPreprocessor:
 
     def preprocess(self, raw_text: str) -> List[str]:
         text = html.unescape(raw_text)
+        text = text.replace('\\n', ' ').replace('\\t', ' ').replace('\\r', ' ')
+        text = text.replace("'", "").replace("’", "")
         text = self._tag_pattern.sub(" ", text)
         text = text.lower()
         text = self._non_word_pattern.sub(" ", text)
@@ -385,7 +387,7 @@ def main() -> None:
     clf.fit(train_docs, train_labels)
 
     metrics = evaluate_classifier(clf, test_docs, test_labels)
-    print("=== Naïve Bayes Spam Classifier (from scratch) ===\n")
+    print("=== Naïve Bayes Spam Classifier ===\n")
     print(metrics.summary())
 
     plot_confusion_matrix(metrics)
