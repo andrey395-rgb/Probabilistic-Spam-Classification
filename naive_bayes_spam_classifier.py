@@ -551,10 +551,11 @@ def load_spamassassin() -> Tuple[List[str], List[str]]:
     return documents, labels
 
 def main() -> None:
-    """Run 80/20 evaluation on the bundled sample corpus and print metrics."""
+    """Run 80/20 evaluation on the SpamAssassin corpus and print metrics."""
+    documents, labels = load_spamassassin()
     train_docs, train_labels, test_docs, test_labels = train_test_split(
-        SAMPLE_RAW_EMAILS,
-        SAMPLE_LABELS,
+        documents,
+        labels,
         test_fraction=0.2,
         seed=7,
     )
