@@ -1,8 +1,7 @@
 """
 Desktop UI for pasting email text and viewing Naïve Bayes classification.
 
-Uses Tkinter (stdlib) — no extra packages. Trains on the bundled sample corpus
-so the model is ready immediately; swap in your own training call if needed.
+Uses Tkinter (stdlib) — no extra packages. Trains on the SpamAssassin corpus.
 """
 
 from __future__ import annotations
@@ -12,15 +11,16 @@ from tkinter import scrolledtext, ttk
 
 from naive_bayes_spam_classifier import (
     MultinomialNaiveBayesClassifier,
-    SAMPLE_LABELS,
-    SAMPLE_RAW_EMAILS,
+    load_spamassassin,
 )
 
 
 def train_demo_classifier() -> MultinomialNaiveBayesClassifier:
-    """Fit on all sample emails so the UI has a non-trivial vocabulary."""
+    """Fit strictly on the SpamAssassin corpus."""
+    train_docs, train_labels = load_spamassassin()
+
     clf = MultinomialNaiveBayesClassifier()
-    clf.fit(SAMPLE_RAW_EMAILS, SAMPLE_LABELS)
+    clf.fit(train_docs, train_labels)
     return clf
 
 
