@@ -379,7 +379,7 @@ def load_spamassassin() -> Tuple[List[str], List[str]]:
 
 def main() -> None:
     documents, labels = load_spamassassin()
-    train_docs, train_labels, test_docs, test_labels = train_test_split(documents, labels, test_fraction=0.2, seed=7)
+    train_docs, train_labels, test_docs, test_labels = train_test_split(documents, labels, test_fraction=0.2, seed=42)
 
     clf = MultinomialNaiveBayesClassifier()
     clf.fit(train_docs, train_labels)
