@@ -5,6 +5,7 @@ Reuses the same 80/20 evaluation path as the project report (seed=42, SpamAssass
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -29,7 +30,8 @@ def _run_eval(seed: int = 42, test_fraction: float = 0.2):
     )
     clf = MultinomialNaiveBayesClassifier()
     clf.fit(train_docs, train_labels)
-    return evaluate_classifier(clf, test_docs, test_labels)
+    metrics = evaluate_classifier(clf, test_docs, test_labels)
+    return metrics, clf
 
 
 def save_confusion_matrix_figure(cm, out_path: Path, dpi: int = 150) -> None:
@@ -102,19 +104,55 @@ def save_metrics_bar_figure(metrics, out_path: Path, dpi: int = 150) -> None:
     plt.close(fig)
 
 
+def save_top_predictive_words_figure(
+    clf: MultinomialNaiveBayesClassifier,
+    out_path: Path,
+    top_n: int = 15,
+    dpi: int = 150,
+) -> None:
+    """Saves top predictive words by class as a bar chart figure."""
+    m = clf.model
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+    for idx, cls in enumerate(["ham", "spam"]):
+        # Get the smoothed log-conditionals for the class
+        word_probs = m.log_conditional.get(cls, {})
+
+        # Sort words by their log-probability (highest first)
+        top_words = sorted(word_probs.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        if not top_words:
+            axes[idx].set_title(f"No words available for '{cls.capitalize()}'")
+            axes[idx].set_xlabel("Smoothed Probability P(w|C)")
+            continue
+        words, scores = zip(*top_words)
+
+        # We exponentiate the log-scores back to normal probabilities for easier reading
+        probs = [math.exp(s) for s in scores]
+
+        # Plotting
+        axes[idx].barh(words[::-1], probs[::-1], color="green" if cls == "ham" else "red")
+        axes[idx].set_title(f"Top {top_n} Words Indicating '{cls.capitalize()}'")
+        axes[idx].set_xlabel("Smoothed Probability P(w|C)")
+
+    plt.tight_layout()
+    fmt = "png" if out_path.suffix.lower() == ".png" else "jpeg"
+    fig.savefig(out_path, format=fmt, dpi=dpi)
+    plt.close(fig)
+
+
 def main() -> None:
     out_dir = Path(__file__).resolve().parent / "figures"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print("Running evaluation for figures...", file=sys.stderr)
-    m = _run_eval(seed=42, test_fraction=0.2)
+    m, clf = _run_eval(seed=42, test_fraction=0.2)
 
     save_confusion_matrix_figure(m.confusion, out_dir / "confusion_matrix.jpg")
     save_metrics_bar_figure(m, out_dir / "metrics_bar.jpg")
-    save_confusion_matrix_figure(m.confusion, out_dir / "confusion_matrix.png")
-    save_metrics_bar_figure(m, out_dir / "metrics_bar.png")
+    save_top_predictive_words_figure(clf, out_dir / "top_predictive_words.jpg")
 
-    print(f"Wrote JPG/PNG under: {out_dir}", file=sys.stderr)
+    print(f"Wrote JPG under: {out_dir}", file=sys.stderr)
     print(m.summary())
 
 
