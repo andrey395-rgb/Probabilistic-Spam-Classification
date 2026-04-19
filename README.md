@@ -14,6 +14,7 @@ A spam email classifier built **from scratch** in Python — no scikit-learn or 
 - Log-space computation to prevent floating-point underflow
 - Argmax decision rule over log-posteriors
 - 80/20 train/test evaluation with confusion matrix, accuracy, precision, recall, and F1 score
+- Report figure generation script that exports confusion matrix and metrics charts to JPG/PNG
 - Desktop GUI (Tkinter) for pasting and classifying emails in real time
 - Trained on the [SpamAssassin public corpus](https://huggingface.co/datasets/talby/spamassassin) (~10,749 emails)
 
@@ -23,6 +24,8 @@ A spam email classifier built **from scratch** in Python — no scikit-learn or 
 
 ```
 Probabilistic-Spam-Classification/
+├── evaluation_figures.py           # Figure export script (confusion matrix + metrics bar chart)
+├── figures/                        # Generated JPG/PNG outputs
 ├── naive_bayes_spam_classifier.py   # Core classifier, preprocessing, metrics, dataset loader
 └── spam_classifier_ui.py            # Tkinter desktop UI
 ```
@@ -41,6 +44,7 @@ Install dependencies:
 
 ```bash
 pip install datasets==2.14.7 matplotlib seaborn numpy
+```
 
 > **Note:** The SpamAssassin dataset on Hugging Face (`talby/spamassassin`) still uses an older loading script format. Versions of `datasets` newer than 2.14.7 have dropped support for this format. Downgrading to `2.14.7` is required until the dataset author migrates to Parquet.
 
@@ -68,6 +72,21 @@ python naive_bayes_spam_classifier.py
 ```
 
 This trains on the SpamAssassin corpus, evaluates on an 80/20 hold-out split, and prints the confusion matrix and metrics to the terminal. CLI will pop up visual graphs.
+
+### Generate Report Figures (JPG/PNG)
+
+```bash
+python evaluation_figures.py
+```
+
+This runs the same evaluation pipeline and saves publication-ready figures under `figures/`:
+
+- `figures/confusion_matrix.jpg`
+- `figures/confusion_matrix.png`
+- `figures/metrics_bar.jpg`
+- `figures/metrics_bar.png`
+
+The script uses an 80/20 hold-out split with seed 42, and it retrains from scratch each run using the SpamAssassin dataset (loaded from local cache after the first dataset download).
 
 ---
 
