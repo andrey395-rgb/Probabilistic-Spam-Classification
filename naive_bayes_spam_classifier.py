@@ -9,6 +9,9 @@ import html
 import math
 import random
 import re
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -289,6 +292,84 @@ def evaluate_classifier(clf: MultinomialNaiveBayesClassifier, test_docs: Sequenc
     return ClassificationMetrics(accuracy=accuracy, precision=precision, recall=recall, f1=f1, confusion=cm)
 
 # ===========================================================================
+# CODE BLOCK 5: Results Visualization
+# ===========================================================================
+# Purpose: To generate graphical representations of the classifier's performance
+#          and mathematical decision-making process for the final report.
+# ===========================================================================
+
+def plot_confusion_matrix(metrics: ClassificationMetrics):
+    """Visualizes the confusion matrix as a heatmap."""
+    # Extract counts from your custom ConfusionMatrix class
+    cm = metrics.confusion
+    # Format as a 2x2 grid: [[TN, FP], [FN, TP]]
+    matrix = np.array([
+        [cm.true_negative, cm.false_positive],
+        [cm.false_negative, cm.true_positive]
+    ])
+    
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(matrix, annot=True, fmt="d", cmap="Blues", 
+                xticklabels=["Predicted Ham", "Predicted Spam"],
+                yticklabels=["Actual Ham", "Actual Spam"])
+    
+    plt.title("Spam Classifier Confusion Matrix")
+    plt.ylabel("True Label")
+    plt.xlabel("Predicted Label")
+    plt.tight_layout()
+    plt.show()
+
+def plot_top_predictive_words(clf: MultinomialNaiveBayesClassifier, top_n: int = 15):
+    """Plots the words with the highest log-probabilities for each class."""
+    m = clf.model
+    
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    
+    for idx, cls in enumerate(["ham", "spam"]):
+        # Get the smoothed log-conditionals for the class
+        word_probs = m.log_conditional.get(cls, {})
+        
+        # Sort words by their log-probability (highest first)
+        top_words = sorted(word_probs.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        words, scores = zip(*top_words)
+        
+        # We exponentiate the log-scores back to normal probabilities for easier reading
+        probs = [math.exp(s) for s in scores]
+        
+        # Plotting
+        axes[idx].barh(words[::-1], probs[::-1], color="green" if cls=="ham" else "red")
+        axes[idx].set_title(f"Top {top_n} Words Indicating '{cls.capitalize()}'")
+        axes[idx].set_xlabel("Smoothed Probability P(w|C)")
+    
+    plt.tight_layout()
+    plt.show()
+
+def plot_decision_boundary(clf: MultinomialNaiveBayesClassifier, test_docs: list, test_labels: list):
+    """Plots the distribution of the Spam vs Ham log-scores."""
+    spam_scores = []
+    ham_scores = []
+    
+    for doc, true_label in zip(test_docs, test_labels):
+        # Get the unnormalized log-posterior score for the 'spam' class
+        scores = clf.predict_log_scores(doc)
+        spam_score = scores.get("spam", 0) 
+        
+        if true_label.lower() == "spam":
+            spam_scores.append(spam_score)
+        else:
+            ham_scores.append(spam_score)
+            
+    plt.figure(figsize=(8, 5))
+    plt.hist(ham_scores, bins=50, alpha=0.6, color='green', label='Actual Ham')
+    plt.hist(spam_scores, bins=50, alpha=0.6, color='red', label='Actual Spam')
+    
+    plt.title("Distribution of Log-Posterior Scores for 'Spam' Class")
+    plt.xlabel("Log-Posterior Score (Spam)")
+    plt.ylabel("Frequency")
+    plt.legend()
+    plt.show()
+
+# ===========================================================================
 # Execution / Testing Wrapper
 # ===========================================================================
 def load_spamassassin() -> Tuple[List[str], List[str]]:
@@ -306,6 +387,10 @@ def main() -> None:
     metrics = evaluate_classifier(clf, test_docs, test_labels)
     print("=== Naïve Bayes Spam Classifier (from scratch) ===\n")
     print(metrics.summary())
+
+    plot_confusion_matrix(metrics)
+    plot_top_predictive_words(clf)
+    plot_decision_boundary(clf, test_docs, test_labels)
 
 if __name__ == "__main__":
     main()
